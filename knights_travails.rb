@@ -31,7 +31,7 @@ class Vertex
 
     until queue.empty?
       current = queue.shift
-      return current.find_path(from) if current.data == to
+      return current.trace_path(from) if current.data == to
 
       destinations = board.possible_destinations(current.data, allowed_moves)
 
@@ -46,7 +46,7 @@ class Vertex
     end
   end
 
-  def find_path(from)
+  def trace_path(from)
     path    = []
     current = self
 
