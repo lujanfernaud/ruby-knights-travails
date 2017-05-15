@@ -1,28 +1,30 @@
 require "pry"
 
 class Graph
-  attr_reader :root
+  attr_reader :root, :board
 
   def initialize(data)
+    @root  = Vertex.new(data: data)
     @board = Board.new
-    @root  = Vertex.new(data)
   end
 
   def traverse(to, allowed_moves)
     build_graph(to, allowed_moves)
   end
 
+  private
+
   def build_graph(to, allowed_moves)
-    root.add_neighbors(@board, root, to, allowed_moves)
+    root.add_neighbors(board, root, to, allowed_moves)
   end
 end
 
 class Vertex
   attr_accessor :data, :parent, :neighbors
 
-  def initialize(data = nil)
+  def initialize(data: nil, parent: nil)
     @data      = data
-    @parent    = nil
+    @parent    = parent
     @neighbors = {}
   end
 
@@ -37,14 +39,14 @@ class Vertex
 
       destinations.each do |destination|
         board.visited << destination
-        vertex        = Vertex.new
-        vertex.data   = destination
-        vertex.parent = current
+        vertex = Vertex.new(data: destination, parent: current)
         neighbors[destination] = vertex
         queue << vertex
       end
     end
   end
+
+  protected
 
   def trace_path(from)
     path    = []
@@ -56,10 +58,6 @@ class Vertex
       current = current.parent
     end
   end
-
-  def to_s
-    "#{data} -> neighbors: #{neighbors.map { |_k, v| v.data }}"
-  end
 end
 
 class Board
@@ -70,15 +68,17 @@ class Board
     @visited = []
   end
 
-  def create_board
-    @board = []
-    8.times { |x| 8.times { |y| board << [x, y] } }
-  end
-
   def possible_destinations(position, allowed_moves)
     possible_moves = possible_moves(position, allowed_moves)
     destination = proc { |move| [move[0] + position[0], move[1] + position[1]] }
     possible_moves.map(&destination).uniq - visited
+  end
+
+  private
+
+  def create_board
+    @board = []
+    8.times { |x| 8.times { |y| board << [x, y] } }
   end
 
   def possible_moves(position, allowed_moves)
@@ -95,7 +95,7 @@ class Knight
   attr_reader :allowed_moves
 
   def initialize
-    @allowed_moves = [[-2, 1], [-1, 2], [1, 2], [2, 1],
+    @allowed_moves = [[-2, 1],  [-1, 2],  [1, 2],  [2, 1],
                       [-2, -1], [-1, -2], [1, -2], [2, -1]].freeze
   end
 
