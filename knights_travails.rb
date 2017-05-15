@@ -109,8 +109,12 @@ class Knight
   end
 end
 
-knight = Knight.new
-knight.move([3, 3], [4, 3])
+def knight_moves(*args)
+  knight = Knight.new
+  knight.move(args[0], args[1])
+end
+
+knight_moves([3, 3], [4, 3])
 
 # Board representation:
 #
