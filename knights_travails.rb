@@ -47,9 +47,14 @@ class Vertex
 
     loop do
       path << current.data
-      return path.reverse if current == from
+      return print_result(path) if current == from
       current = current.parent
     end
+  end
+
+  def print_result(path)
+    puts "You made it in #{path.length - 1} moves! Here's your path:"
+    puts "#{path.reverse}"
   end
 
   def add_vertex(board, current, queue)
@@ -108,8 +113,8 @@ class Knight
 end
 
 knight = Knight.new
-p knight.move([3, 3], [4, 3])
-p knight.move([2, 5], [5, 7])
+knight.move([3, 3], [4, 3])
+knight.move([2, 5], [5, 7])
 
 # board = [[0, 0], [0, 1], [0, 2], [0, 3], [0, 4], [0, 5], [0, 6], [0, 7],
 #          [1, 0], [1, 1], [1, 2], [1, 3], [1, 4], [1, 5], [1, 6], [1, 7],
