@@ -1,56 +1,119 @@
 require "pry"
 
-class Board
-  attr_accessor :matrix
+class Graph
+  attr_reader :root
 
-  def initialize
-    # @matrix = Array.new(8) { Array.new(8) { 0 } }
-    @matrix = Array.new(8) { [1, 2, 3, 4, 5, 6, 7, 8] }
-    create_graph
+  def initialize(data)
+    @board = Board.new
+    @root  = Vertex.new(data)
   end
 
-  def create_graph
-    @matrix.each do |x|
-      x.each do |y|
-        vertex = Vertex.new(y)
-        x[x.index(y)] = vertex
-      end
-    end
-
-    @matrix.each do |x|
-      x.each do |y|
-        vertex = y
-        add_edges(vertex, @matrix.index(x), x.index(y))
-      end
-    end
+  def traverse(to, allowed_moves)
+    build_graph(to, allowed_moves)
   end
 
-  def add_edges(vertex, x, y)
-    vertex.edges << @matrix[x + 1][y] if x >= 0 && x <= 6
-    vertex.edges << @matrix[x - 1][y] if x >= 1 && x <= 7
-    vertex.edges << @matrix[x][y + 1] if y >= 0 && y <= 6
-    vertex.edges << @matrix[x][y - 1] if y >= 1 && y <= 7
+  def build_graph(to, allowed_moves)
+    root.add_neighbors(@board, root, to, allowed_moves)
   end
 end
 
 class Vertex
-  attr_accessor :value, :edges
+  attr_accessor :data, :parent, :neighbors
 
-  def initialize(value = nil, edges = [])
-    @value = value
-    @edges = edges
+  def initialize(data = nil)
+    @data      = data
+    @parent    = nil
+    @neighbors = {}
+  end
+
+  def add_neighbors(board, from, to, allowed_moves)
+    queue = [self]
+
+    until queue.empty?
+      current = queue.shift
+      return current.find_path(from) if current.data == to
+
+      destinations = board.possible_destinations(current.data, allowed_moves)
+
+      destinations.each do |destination|
+        board.visited << destination
+        vertex        = Vertex.new
+        vertex.data   = destination
+        vertex.parent = current
+        neighbors[destination] = vertex
+        queue << vertex
+      end
+    end
+  end
+
+  def find_path(from)
+    path    = []
+    current = self
+
+    loop do
+      path << current.data
+      return path.reverse if current == from
+      current = current.parent
+    end
+  end
+
+  def to_s
+    "#{data} -> neighbors: #{neighbors.map { |_k, v| v.data }}"
+  end
+end
+
+class Board
+  attr_accessor :board, :visited
+
+  def initialize
+    create_board
+    @visited = []
+  end
+
+  def create_board
+    @board = []
+    8.times { |x| 8.times { |y| board << [x, y] } }
+  end
+
+  def possible_destinations(position, allowed_moves)
+    possible_moves = possible_moves(position, allowed_moves)
+    destination = proc { |move| [move[0] + position[0], move[1] + position[1]] }
+    possible_moves.map(&destination).uniq - visited
+  end
+
+  def possible_moves(position, allowed_moves)
+    allowed_moves.select do |move|
+      x = position[0] + move[0]
+      y = position[1] + move[1]
+      board_size = 0..7
+      board_size.cover?(x) && board_size.cover?(y)
+    end
   end
 end
 
 class Knight
-  attr_accessor :board
+  attr_reader :allowed_moves
 
   def initialize
-    @board = Board.new
+    @allowed_moves = [[-2, 1], [-1, 2], [1, 2], [2, 1],
+                      [-2, -1], [-1, -2], [1, -2], [2, -1]].freeze
   end
 
-  def move(start, finish)
+  def move(from, to)
+    graph = Graph.new(from)
+    graph.traverse(to, allowed_moves)
   end
 end
 
-board = Board.new
+knight = Knight.new
+p knight.move([3, 3], [4, 3])
+p knight.move([2, 5], [5, 7])
+
+# board = [[0, 0], [0, 1], [0, 2], [0, 3], [0, 4], [0, 5], [0, 6], [0, 7],
+#          [1, 0], [1, 1], [1, 2], [1, 3], [1, 4], [1, 5], [1, 6], [1, 7],
+#          [2, 0], [2, 1], [2, 2], [2, 3], [2, 4], [2, 5], [2, 6], [2, 7],
+#          [3, 0], [3, 1], [3, 2], [3, 3], [3, 4], [3, 5], [3, 6], [3, 7],
+#          [4, 0], [4, 1], [4, 2], [4, 3], [4, 4], [4, 5], [4, 6], [4, 7],
+#          [5, 0], [5, 1], [5, 2], [5, 3], [5, 4], [5, 5], [5, 6], [5, 7],
+#          [6, 0], [6, 1], [6, 2], [6, 3], [6, 4], [6, 5], [6, 6], [6, 7],
+#          [7, 0], [7, 1], [7, 2], [7, 3], [7, 4], [7, 5], [7, 6], [7, 7]]
