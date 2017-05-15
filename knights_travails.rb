@@ -95,7 +95,7 @@ class Knight
   attr_reader :allowed_moves
 
   def initialize
-    @allowed_moves = [[-2, 1],  [-1, 2],  [1, 2],  [2, 1],
+    @allowed_moves = [[-2,  1], [-1,  2], [1,  2], [2,  1],
                       [-2, -1], [-1, -2], [1, -2], [2, -1]].freeze
   end
 
