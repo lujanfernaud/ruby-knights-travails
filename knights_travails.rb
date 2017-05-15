@@ -100,14 +100,12 @@ class Knight
   end
 
   def move(from, to)
-    graph = Graph.new(from)
-    graph.traverse(to, allowed_moves)
+    Graph.new(from).traverse(to, allowed_moves)
   end
 end
 
 def knight_moves(*args)
-  knight = Knight.new
-  knight.move(args[0], args[1])
+  Knight.new.move(args[0], args[1])
 end
 
 knight_moves([3, 3], [4, 3])
