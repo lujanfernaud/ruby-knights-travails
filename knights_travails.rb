@@ -7,12 +7,6 @@ class Graph
   end
 
   def traverse(to, allowed_moves)
-    build_graph(to, allowed_moves)
-  end
-
-  private
-
-  def build_graph(to, allowed_moves)
     root.add_neighbors(board, root, to, allowed_moves)
   end
 end
