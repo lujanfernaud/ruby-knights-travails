@@ -69,7 +69,7 @@ class Board
   attr_accessor :board, :visited
 
   def initialize
-    create_board
+    @board   = Array.new { 8.times { |x| 8.times { |y| [x, y] } } }
     @visited = []
   end
 
@@ -80,10 +80,6 @@ class Board
   end
 
   private
-
-  def create_board
-    @board = Array.new { 8.times { |x| 8.times { |y| [x, y] } } }
-  end
 
   def possible_moves(position, allowed_moves)
     allowed_moves.select do |move|
