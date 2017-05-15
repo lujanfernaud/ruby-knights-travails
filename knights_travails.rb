@@ -44,6 +44,8 @@ class Vertex
     end
   end
 
+  private
+
   def print_result(path)
     puts "You made it in #{path.length - 1} moves! Here's your path:"
     puts "#{path.reverse}"
