@@ -82,8 +82,7 @@ class Board
   private
 
   def create_board
-    @board = []
-    8.times { |x| 8.times { |y| board << [x, y] } }
+    @board = Array.new { 8.times { |x| 8.times { |y| [x, y] } } }
   end
 
   def possible_moves(position, allowed_moves)
