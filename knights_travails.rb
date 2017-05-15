@@ -1,13 +1,13 @@
 class Graph
-  attr_reader :root, :board
+  attr_reader :from, :board
 
   def initialize(data)
-    @root  = Vertex.new(data: data)
+    @from  = Vertex.new(data: data)
     @board = Board.new
   end
 
   def traverse(to, allowed_moves)
-    root.add_neighbors(board, root, to, allowed_moves)
+    from.add_neighbors(board, from, to, allowed_moves)
   end
 end
 
