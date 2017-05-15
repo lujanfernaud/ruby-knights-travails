@@ -1,62 +1,73 @@
 require "pry"
 
 class Graph
-  attr_accessor :root
+  attr_reader :root
 
   def initialize(data)
     @board = Board.new
     @root  = Vertex.new(data)
   end
 
-  def traverse(finish, allowed_moves)
-    @root.add_children(@board, finish, allowed_moves)
+  def traverse(to, allowed_moves)
+    build_graph(to, allowed_moves)
+  end
+
+  def build_graph(to, allowed_moves)
+    root.add_neighbors(@board, root, to, allowed_moves)
   end
 end
 
 class Vertex
-  attr_accessor :data, :parent, :children
+  attr_accessor :data, :parent, :neighbors
 
   def initialize(data = nil)
     @data      = data
     @parent    = nil
-    @children  = {}
+    @neighbors = {}
   end
 
-  def insert(data)
-    vertex = Vertex.new(data)
-    vertex.parent = self
-    @children[data] = vertex
+  def add_neighbors(board, from, to, allowed_moves)
+    queue = [self]
+
+    until queue.empty?
+      current = queue.shift
+      return current.find_path(from) if current.data == to
+
+      destinations = board.possible_destinations(current.data, allowed_moves)
+
+      destinations.each do |destination|
+        board.visited << destination
+        vertex        = Vertex.new
+        vertex.data   = destination
+        vertex.parent = self
+        neighbors[destination] = vertex
+        queue << vertex
+      end
+    end
   end
 
-  # def add_children(board, finish, allowed_moves)
-  #   destinations = board.possible_destinations(data, allowed_moves)
-  #   destinations.each do |destination|
-  #     vertex = Vertex.new
-  #     vertex.parent = self
-  #     @children[destination] = vertex
-  #   end
-  # end
+  def find_path(from)
+    path    = []
+    current = self
 
-  def add_children(board, finish, allowed_moves)
-    # return if data == finish
+    loop do
+      path << current.data
+      return path if current == from
+      current = parent
+    end
+  end
 
-    # binding.pry
-
-    # destinations = board.possible_destinations(data, allowed_moves)
-    # destinations.each do |destination|
-    #   vertex = Vertex.new
-    #   vertex.parent = self
-    #   @children[destination] = vertex
-    #   vertex.add_children(board, finish, allowed_moves)
-    # end
+  def to_s
+    "#{data} -> neighbors: #{neighbors.map { |_k, v| v.data }}"
   end
 end
 
 class Board
-  attr_accessor :board
+  attr_accessor :board, :visited
 
   def initialize
     create_board
+    @visited = []
   end
 
   def create_board
@@ -67,7 +78,7 @@ class Board
   def possible_destinations(position, allowed_moves)
     possible_moves = possible_moves(position, allowed_moves)
     destination = proc { |move| [move[0] + position[0], move[1] + position[1]] }
-    possible_moves.map(&destination)
+    possible_moves.map(&destination).uniq - visited
   end
 
   def possible_moves(position, allowed_moves)
@@ -84,15 +95,25 @@ class Knight
   attr_reader :allowed_moves
 
   def initialize
-    @allowed_moves = [[-2, 1], [-1, 2], [2, 1], [1, 2],
-                      [-1, 2], [-2, 1], [-1, 2], [-2, -1]].freeze
+    @allowed_moves = [[-2, 1], [-1, 2], [1, 2], [2, 1],
+                      [-2, -1], [-1, -2], [1, -2], [2, -1]].freeze
   end
 
-  def move(start, finish)
-    graph = Graph.new(start)
-    graph.traverse(finish, allowed_moves)
+  def move(from, to)
+    graph = Graph.new(from)
+    graph.traverse(to, allowed_moves)
   end
 end
 
 knight = Knight.new
-knight.move([2, 7], [0, 2])
+p knight.move([3, 3], [4, 3])
+p knight.move([2, 5], [5, 7])
+
+board = [[0, 0], [0, 1], [0, 2], [0, 3], [0, 4], [0, 5], [0, 6], [0, 7],
+         [1, 0], [1, 1], [1, 2], [1, 3], [1, 4], [1, 5], [1, 6], [1, 7],
+         [2, 0], [2, 1], [2, 2], [2, 3], [2, 4], [2, 5], [2, 6], [2, 7],
+         [3, 0], [3, 1], [3, 2], [3, 3], [3, 4], [3, 5], [3, 6], [3, 7],
+         [4, 0], [4, 1], [4, 2], [4, 3], [4, 4], [4, 5], [4, 6], [4, 7],
+         [5, 0], [5, 1], [5, 2], [5, 3], [5, 4], [5, 5], [5, 6], [5, 7],
+         [6, 0], [6, 1], [6, 2], [6, 3], [6, 4], [6, 5], [6, 6], [6, 7],
+         [7, 0], [7, 1], [7, 2], [7, 3], [7, 4], [7, 5], [7, 6], [7, 7]]
