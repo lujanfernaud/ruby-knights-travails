@@ -34,15 +34,8 @@ class Vertex
     until queue.empty?
       current = queue.shift
       return current.trace_path(from) if current.data == to
-
       destinations = board.possible_destinations(current.data, allowed_moves)
-
-      destinations.each do |destination|
-        board.visited << destination
-        vertex = Vertex.new(data: destination, parent: current)
-        neighbors[destination] = vertex
-        queue << vertex
-      end
+      destinations.each(&add_vertex(board, current, queue))
     end
   end
 
@@ -56,6 +49,15 @@ class Vertex
       path << current.data
       return path.reverse if current == from
       current = current.parent
+    end
+  end
+
+  def add_vertex(board, current, queue)
+    proc do |destination|
+      board.visited << destination
+      vertex = Vertex.new(data: destination, parent: current)
+      current.neighbors[destination] = vertex
+      queue << vertex
     end
   end
 end
